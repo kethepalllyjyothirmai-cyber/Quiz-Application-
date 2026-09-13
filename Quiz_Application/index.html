@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Application</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:min(700px,100%);background:white;border-radius:20px;padding:35px;box-shadow:0 15px 40px rgba(0,0,0,.25)}
+h1{text-align:center;margin-top:5px}.intro{text-align:center;color:#666;line-height:1.6}
+button{border:0;border-radius:10px;padding:14px 20px;font-size:16px;font-weight:bold;cursor:pointer}
+.primary{display:block;margin:25px auto 0;background:#667eea;color:white}
+.option{display:block;width:100%;margin:12px 0;text-align:left;background:#f3f4f8;color:#222;border:2px solid transparent}
+.option:hover{border-color:#667eea}.option.selected{border-color:#667eea;background:#e9e7ff}
+.next{width:100%;margin-top:20px;background:#667eea;color:white}.next:disabled{opacity:.45;cursor:not-allowed}
+.hidden{display:none}.top{display:flex;justify-content:space-between;color:#666;font-weight:bold}
+.progress{height:8px;background:#eee;border-radius:10px;margin:15px 0 25px;overflow:hidden}
+#bar{height:100%;background:#667eea;width:10%;transition:.3s}
+#result{text-align:center}.score{font-size:50px;font-weight:bold;color:#667eea;margin:25px}
+</style>
+</head>
+<body>
+<div class="card">
+<section id="start">
+<h1>Quiz Application</h1>
+<p class="intro">Test your knowledge with 10 multiple-choice questions.</p>
+<button class="primary" onclick="startQuiz()">Start Quiz</button>
+</section>
+
+<section id="quiz" class="hidden">
+<div class="top"><span id="count"></span><span id="score">Score: 0</span></div>
+<div class="progress"><div id="bar"></div></div>
+<h2 id="question"></h2>
+<div id="options"></div>
+<button id="next" class="next" disabled onclick="nextQuestion()">Next Question</button>
+</section>
+
+<section id="result" class="hidden">
+<h1>Quiz Completed!</h1>
+<div id="final" class="score"></div>
+<p id="message" class="intro"></p>
+<button class="primary" onclick="startQuiz()">Try Again</button>
+</section>
+</div>
+
+<script>
+const questions=[
+{q:"Which language is mainly used to structure a web page?",o:["HTML","CSS","JavaScript","Python"],a:0},
+{q:"Which technology is used to style a web page?",o:["HTML","CSS","SQL","Java"],a:1},
+{q:"Which language adds interactivity to a web page?",o:["HTML","CSS","JavaScript","XML"],a:2},
+{q:"Which keyword declares a reassignable variable in JavaScript?",o:["const","let","fixed","define"],a:1},
+{q:"Which method converts a JSON string into a JavaScript object?",o:["JSON.parse()","JSON.stringify()","JSON.object()","JSON.convert()"],a:0},
+{q:"Which HTML element creates a hyperlink?",o:["<p>","<img>","<a>","<link>"],a:2},
+{q:"Which CSS property changes text color?",o:["font-style","color","background","text-size"],a:1},
+{q:"Which symbol is used for an ID selector in CSS?",o:[".","#","*","&"],a:1},
+{q:"Which JavaScript method adds an item to the end of an array?",o:["push()","pop()","shift()","slice()"],a:0},
+{q:"What does DOM stand for?",o:["Data Object Model","Document Object Model","Digital Output Method","Document Order Map"],a:1}
+];
+
+let current=0,score=0,selected=-1;
+
+function startQuiz(){
+ current=0;score=0;selected=-1;
+ document.getElementById("start").classList.add("hidden");
+ document.getElementById("result").classList.add("hidden");
+ document.getElementById("quiz").classList.remove("hidden");
+ showQuestion();
+}
+
+function showQuestion(){
+ selected=-1;
+ const q=questions[current];
+ document.getElementById("count").textContent=`Question ${current+1} of ${questions.length}`;
+ document.getElementById("score").textContent=`Score: ${score}`;
+ document.getElementById("bar").style.width=((current+1)/questions.length*100)+"%";
+ document.getElementById("question").textContent=q.q;
+ const box=document.getElementById("options");
+ box.innerHTML="";
+ q.o.forEach((text,i)=>{
+   const b=document.createElement("button");
+   b.className="option";
+   b.textContent=String.fromCharCode(65+i)+". "+text;
+   b.onclick=()=>selectOption(i);
+   box.appendChild(b);
+ });
+ const next=document.getElementById("next");
+ next.disabled=true;
+ next.textContent=current===questions.length-1?"Show Result":"Next Question";
+}
+
+function selectOption(i){
+ selected=i;
+ document.querySelectorAll(".option").forEach((b,n)=>b.classList.toggle("selected",n===i));
+ document.getElementById("next").disabled=false;
+}
+
+function nextQuestion(){
+ if(selected<0)return;
+ if(selected===questions[current].a)score++;
+ if(current<questions.length-1){current++;showQuestion();}
+ else showResult();
+}
+
+function showResult(){
+ document.getElementById("quiz").classList.add("hidden");
+ document.getElementById("result").classList.remove("hidden");
+ document.getElementById("final").textContent=score+"/"+questions.length;
+ const p=score/questions.length*100;
+ document.getElementById("message").textContent=
+ p>=80?"Excellent work! You have a strong understanding of the topics.":
+ p>=50?"Good attempt! Review a few topics and try again.":
+ "Keep practicing! Every attempt helps you improve.";
+}
+</script>
+</body>
+</html>
